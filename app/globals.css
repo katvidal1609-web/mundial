@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --grass: #639922;
+  --grass-light: #7ab82a;
+  --grass-dark: #4d7519;
+}
+
+@layer base {
+  html {
+    font-family: Inter, system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+    transition: background-color 0.2s;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .tab-active {
+    @apply border-b-2 border-[#639922] text-[#639922] font-semibold;
+  }
+
+  .tab-inactive {
+    @apply border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300;
+  }
+
+  .card {
+    @apply rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm p-4;
+  }
+
+  .badge-playing {
+    @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400;
+  }
+
+  .badge-qualified {
+    @apply bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400;
+  }
+
+  .badge-eliminated {
+    @apply bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400;
+  }
+
+  .badge-pending {
+    @apply bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+::-webkit-scrollbar-thumb {
+  background: #639922;
+  border-radius: 3px;
+}
+
+/* Bar animation */
+.bar-fill {
+  animation: barFill 0.7s ease-out forwards;
+}
+
+@keyframes barFill {
+  from { width: 0% }
+  to { width: var(--target-width) }
+}
