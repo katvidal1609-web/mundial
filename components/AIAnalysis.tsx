@@ -33,68 +33,77 @@ export default function AIAnalysis() {
   }, [])
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-          🤖 Análisis del día
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Generado por IA · actualizado una vez por día
+    <section className="bg-pitch-mid py-16 sm:py-20">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Section Header */}
+        <p className="text-[11px] font-bold text-accent-green uppercase tracking-[0.2em] mb-3">
+          ANÁLISIS IA
         </p>
-      </div>
+        <h2 className="text-3xl sm:text-4xl font-black text-on-dark mb-2">
+          Lo que está pasando hoy
+        </h2>
+        <p className="text-on-dark/50 text-base mb-10">
+          Generado por Claude (Anthropic) · actualizado una vez por día
+        </p>
 
-      {loading && (
-        <div className="card space-y-3 animate-pulse">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/6" />
-        </div>
-      )}
-
-      {!loading && error && (
-        <div className="card text-sm text-gray-500 dark:text-gray-400 text-center py-6">
-          {error}
-        </div>
-      )}
-
-      {!loading && content && (
-        <div className="space-y-3 animate-slide-up">
-          <div className="card bg-[#639922]/5 border-[#639922]/20">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-2 leading-snug">
-              {content.headline}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              {content.summary}
-            </p>
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-white/5 rounded-2xl p-6 space-y-3 animate-pulse">
+            <div className="h-5 bg-white/10 rounded w-3/4" />
+            <div className="h-4 bg-white/10 rounded w-full" />
+            <div className="h-4 bg-white/10 rounded w-5/6" />
           </div>
+        )}
 
-          {content.highlights?.map((h, i) => (
-            <div key={i} className="card flex items-start gap-3">
-              <span className="text-2xl shrink-0 mt-0.5">{h.icon}</span>
-              <div>
-                <div className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">
-                  {h.title}
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {h.body}
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Error State */}
+        {!loading && error && (
+          <div className="bg-white/5 rounded-2xl p-8 text-center">
+            <p className="text-on-dark/60 text-sm">{error}</p>
+          </div>
+        )}
 
-          {content.latamFocus && (
-            <div className="card border-l-4 border-l-[#639922] rounded-l-none">
-              <div className="text-[11px] font-bold text-[#639922] uppercase tracking-wider mb-1.5">
-                🌎 Foco LATAM
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                {content.latamFocus}
+        {/* Content State */}
+        {!loading && content && (
+          <div>
+            {/* Main Headline Card */}
+            <div className="bg-white/8 rounded-2xl p-6 mb-6 border border-white/10">
+              <h3 className="text-xl sm:text-2xl font-black text-on-dark mb-3">
+                {content.headline}
+              </h3>
+              <p className="text-on-dark/75 text-base leading-relaxed">
+                {content.summary}
               </p>
             </div>
-          )}
-        </div>
-      )}
-    </div>
+
+            {/* Highlights Grid */}
+            {content.highlights?.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {content.highlights.map((h, i) => (
+                  <div key={i} className="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <div className="text-3xl mb-3">{h.icon}</div>
+                    <div className="text-sm font-bold text-on-dark mb-1">{h.title}</div>
+                    <div className="text-on-dark/65 text-xs leading-relaxed">{h.body}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* LATAM Focus Block */}
+            {content.latamFocus && (
+              <div className="bg-accent-green/10 border border-accent-green/30 rounded-2xl p-5">
+                <p className="text-[11px] font-bold text-accent-green uppercase tracking-wider mb-2">
+                  🌎 FOCO LATAM
+                </p>
+                <p className="text-on-dark/80 text-sm leading-relaxed">
+                  {content.latamFocus}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+      </div>
+    </section>
   )
 }

@@ -44,7 +44,7 @@ export async function GET() {
     }
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = (process.env.ANTHROPIC_API_KEY ?? '').trim()
   if (!apiKey) {
     return NextResponse.json(
       { error: 'Análisis no disponible (ANTHROPIC_API_KEY no configurada)' },

@@ -2,32 +2,143 @@ import type { Match } from '@/lib/types'
 import { t } from '@/lib/translations'
 import { getFlag } from '@/lib/flags'
 
-function MatchRow({ match }: { match: Match }) {
-  const isPlayed = !!match.score?.ft
+function toLimaTime(dateStr: string, timeStr: string): string {
+  if (!timeStr) return ''
+  try {
+    const dt = new Date(`${dateStr}T${timeStr}:00Z`)
+    return dt.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/Lima',
+    })
+  } catch {
+    return timeStr
+  }
+}
+
+function PlayedCard({ match }: { match: Match }) {
+  const [g1, g2] = match.score!.ft
+  const winner = g1 > g2 ? match.team1 : g2 > g1 ? match.team2 : null
+
+  const scoreColorLeft =
+    winner === match.team1
+      ? 'text-accent-green'
+      : winner === null
+      ? 'text-on-dark'
+      : 'text-on-dark/60'
+
+  const scoreColorRight =
+    winner === match.team2
+      ? 'text-accent-green'
+      : winner === null
+      ? 'text-on-dark'
+      : 'text-on-dark/60'
+
   return (
-    <div className="flex items-center gap-2 py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
-      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        <span className="text-lg">{getFlag(match.team1)}</span>
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
-          {t(match.team1)}
+    <div className="shrink-0 w-72 sm:w-auto bg-white/5 border border-white/10 rounded-2xl p-4">
+      {/* Top row: round + ground */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] text-on-dark/40 uppercase tracking-wide">
+          {match.round}
         </span>
-      </div>
-      <div className="shrink-0 px-2 text-center min-w-[56px]">
-        {isPlayed ? (
-          <span className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">
-            {match.score!.ft[0]}–{match.score!.ft[1]}
-          </span>
-        ) : (
-          <span className="text-[11px] font-semibold text-[#639922] bg-[#639922]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-            {match.time ?? 'Por jugar'}
+        {match.ground && (
+          <span className="text-[10px] text-on-dark/40 truncate max-w-[120px]">
+            {match.ground}
           </span>
         )}
       </div>
-      <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate text-right">
-          {t(match.team2)}
+
+      {/* Middle: team1 — score — team2 */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Team 1 */}
+        <div className="flex-1 flex flex-col items-center gap-1 text-center">
+          <span className="text-3xl">{getFlag(match.team1)}</span>
+          <span
+            className={`text-xs font-semibold leading-tight ${
+              winner === match.team1 ? 'text-on-dark' : 'text-on-dark/60'
+            }`}
+          >
+            {t(match.team1)}
+          </span>
+        </div>
+
+        {/* Score */}
+        <div className="flex items-center gap-1 shrink-0">
+          <span className={`text-4xl font-black tabular-nums leading-none ${scoreColorLeft}`}>
+            {g1}
+          </span>
+          <span className="text-4xl font-black tabular-nums leading-none text-on-dark/40">
+            –
+          </span>
+          <span className={`text-4xl font-black tabular-nums leading-none ${scoreColorRight}`}>
+            {g2}
+          </span>
+        </div>
+
+        {/* Team 2 */}
+        <div className="flex-1 flex flex-col items-center gap-1 text-center">
+          <span className="text-3xl">{getFlag(match.team2)}</span>
+          <span
+            className={`text-xs font-semibold leading-tight ${
+              winner === match.team2 ? 'text-on-dark' : 'text-on-dark/60'
+            }`}
+          >
+            {t(match.team2)}
+          </span>
+        </div>
+      </div>
+
+      {/* Bottom: Final tag */}
+      <div className="text-[10px] text-on-dark/40 text-center mt-2 uppercase tracking-wide">
+        Final
+      </div>
+    </div>
+  )
+}
+
+function UpcomingCard({ match }: { match: Match }) {
+  const limaTime = toLimaTime(match.date, match.time)
+
+  return (
+    <div className="shrink-0 w-72 sm:w-auto bg-white/5 border border-white/10 rounded-2xl p-4">
+      {/* Top row: round + ground */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] text-on-dark/40 uppercase tracking-wide">
+          {match.round}
         </span>
-        <span className="text-lg">{getFlag(match.team2)}</span>
+        {match.ground && (
+          <span className="text-[10px] text-on-dark/40 truncate max-w-[120px]">
+            {match.ground}
+          </span>
+        )}
+      </div>
+
+      {/* Middle: team1 — time — team2 */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Team 1 */}
+        <div className="flex-1 flex flex-col items-center gap-1 text-center">
+          <span className="text-3xl">{getFlag(match.team1)}</span>
+          <span className="text-xs font-semibold leading-tight text-on-dark">
+            {t(match.team1)}
+          </span>
+        </div>
+
+        {/* Time pill */}
+        <div className="flex flex-col items-center shrink-0">
+          <span className="bg-accent-green/20 text-accent-green font-bold px-2 py-1 rounded-lg text-sm">
+            {limaTime || 'Por jugar'}
+          </span>
+          <span className="text-[9px] text-on-dark/40 mt-0.5">Lima</span>
+        </div>
+
+        {/* Team 2 */}
+        <div className="flex-1 flex flex-col items-center gap-1 text-center">
+          <span className="text-3xl">{getFlag(match.team2)}</span>
+          <span className="text-xs font-semibold leading-tight text-on-dark">
+            {t(match.team2)}
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -35,52 +146,148 @@ function MatchRow({ match }: { match: Match }) {
 
 export default function Hero({ matches }: { matches: Match[] }) {
   const today = new Date().toISOString().slice(0, 10)
-  const todayMatches = matches.filter((m) => m.date === today)
+  const todayPlayed = matches.filter((m) => m.date === today && m.score?.ft)
+  const todayPending = matches.filter((m) => m.date === today && !m.score?.ft)
 
-  const dateLabel = new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
+  const noMatchesToday = todayPlayed.length === 0 && todayPending.length === 0
+
+  // Fallback data when no matches today
+  const recentPlayed = noMatchesToday
+    ? matches.filter((m) => m.score?.ft).slice(-3)
+    : []
+  const nextUpcoming = noMatchesToday
+    ? matches.filter((m) => !m.score?.ft).slice(0, 3)
+    : []
+
+  // Determine what to show and which label to use
+  const showPlayed = todayPlayed.length > 0 ? todayPlayed : recentPlayed
+  const showUpcoming = todayPending.length > 0 ? todayPending : nextUpcoming
+
+  const playedLabel =
+    todayPlayed.length > 0
+      ? 'RESULTADOS DE HOY'
+      : 'ÚLTIMOS RESULTADOS'
+
+  const upcomingLabel =
+    todayPending.length > 0
+      ? 'PARTIDOS DE HOY'
+      : 'PRÓXIMOS PARTIDOS'
+
+  // Top label: "PARTIDOS DE HOY" if there are today matches, else "ÚLTIMOS RESULTADOS"
+  const sectionLabel =
+    todayPlayed.length > 0 || todayPending.length > 0
+      ? 'PARTIDOS DE HOY'
+      : 'ÚLTIMOS RESULTADOS'
 
   return (
-    <section className="py-6">
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-            Mundial 2026 🏆
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 capitalize">
-            {dateLabel}
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-[#639922] bg-[#639922]/10 px-3 py-1.5 rounded-full shrink-0 mt-1">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#639922] animate-pulse" />
-          En vivo
-        </div>
-      </div>
+    <section className="bg-pitch-dark">
+      {/* ── NAVBAR ── */}
+      <nav className="sticky top-0 z-50 bg-pitch-dark/95 backdrop-blur-sm border-b border-white/10">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          {/* Left: logo */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xl" aria-hidden="true">⚽</span>
+            <span className="font-bold text-on-dark text-lg">Mundial 2026</span>
+            <span className="text-accent-green font-semibold text-sm ml-1">LATAM Hub</span>
+          </div>
 
-      {todayMatches.length > 0 ? (
-        <div className="card">
-          <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-            Partidos de hoy
-          </h2>
-          <div>
-            {todayMatches.map((m) => (
-              <MatchRow key={`${m.date}_${m.team1}_${m.team2}`} match={m} />
-            ))}
+          {/* Right: EN VIVO badge */}
+          <div className="flex items-center gap-1.5 text-xs font-bold text-accent-green bg-accent-green/10 px-3 py-1.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" aria-hidden="true" />
+            EN VIVO
           </div>
         </div>
-      ) : (
-        <div className="card text-center py-5">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            No hay partidos programados para hoy.
+      </nav>
+
+      {/* ── HERO BODY ── */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        {/* Center text block */}
+        <div className="text-center">
+          <p className="text-xs font-bold text-accent-green uppercase tracking-[0.2em] mb-4">
+            FIFA WORLD CUP 2026
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
-            11 jun – 19 jul 2026 · EE.UU. / México / Canadá
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-on-dark leading-none">
+            El Mundial 2026
+            <br />
+            <span className="text-accent-green">en tu idioma</span>
+          </h1>
+          <p className="text-on-dark/60 text-lg mt-4 max-w-xl mx-auto">
+            Resultados, predicciones e IA para toda LATAM · 11 jun – 19 jul
           </p>
         </div>
-      )}
+
+        {/* ── SCOREBOARD CARDS ── */}
+        <div className="mt-12">
+          {/* Single-section case: only played OR only upcoming (no mixed today) */}
+          {noMatchesToday ? (
+            <>
+              {/* Últimos resultados */}
+              {showPlayed.length > 0 && (
+                <div className="mb-8">
+                  <p className="text-[11px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-4">
+                    {playedLabel}
+                  </p>
+                  <div className="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+                    {showPlayed.map((m) => (
+                      <PlayedCard key={`${m.date}_${m.team1}_${m.team2}`} match={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Próximos partidos */}
+              {showUpcoming.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-4">
+                    {upcomingLabel}
+                  </p>
+                  <div className="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+                    {showUpcoming.map((m) => (
+                      <UpcomingCard key={`${m.date}_${m.team1}_${m.team2}`} match={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Today played + today pending, each with its own label */}
+              {todayPlayed.length > 0 && (
+                <div className="mb-8">
+                  <p className="text-[11px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-4">
+                    RESULTADOS DE HOY
+                  </p>
+                  <div className="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+                    {todayPlayed.map((m) => (
+                      <PlayedCard key={`${m.date}_${m.team1}_${m.team2}`} match={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {todayPending.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-4">
+                    PARTIDOS DE HOY
+                  </p>
+                  <div className="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+                    {todayPending.map((m) => (
+                      <UpcomingCard key={`${m.date}_${m.team1}_${m.team2}`} match={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Empty fallback */}
+          {showPlayed.length === 0 && showUpcoming.length === 0 && (
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+              <p className="text-sm text-on-dark/60">Cargando partidos…</p>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   )
 }

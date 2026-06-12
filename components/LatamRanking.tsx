@@ -5,6 +5,7 @@ import type { Match, TeamStanding } from '@/lib/types'
 import { getGroupStandings } from '@/lib/fixture'
 import { getFlag, LATAM_TEAMS, LATAM_GROUPS } from '@/lib/flags'
 import { t } from '@/lib/translations'
+import { getPassPct } from '@/lib/bettingData'
 
 function StatusBadge({ status }: { status: TeamStanding['status'] }) {
   const map = {
@@ -84,6 +85,11 @@ export default function LatamRanking({ matches }: { matches: Match[] }) {
                       {t(s.team)}
                     </span>
                     <StatusBadge status={s.status} />
+                    {s.status !== 'qualified' && s.status !== 'eliminated' && (
+                      <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                        {getPassPct(s.team, s.position, s.played)}% de clasificar
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Grupo {s.group} · {s.position > 0 ? `${s.position}° del grupo` : 'sin jugar'}

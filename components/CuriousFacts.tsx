@@ -1,5 +1,4 @@
 'use client'
-
 import { useMemo } from 'react'
 import type { Match } from '@/lib/types'
 import { calcStats } from '@/lib/fixture'
@@ -39,137 +38,142 @@ const FIXED_FACTS = [
   },
 ]
 
-function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-}: {
-  icon: string
-  label: string
-  value: string | number
-  sub?: string
-}) {
-  return (
-    <div className="card flex items-center gap-3">
-      <div className="text-3xl shrink-0">{icon}</div>
-      <div className="min-w-0">
-        <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
-        <div className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{value}</div>
-        {sub && <div className="text-[11px] text-gray-400 mt-0.5">{sub}</div>}
-      </div>
-    </div>
-  )
-}
-
 export default function CuriousFacts({ matches }: { matches: Match[] }) {
   const stats = useMemo(() => calcStats(matches), [matches])
 
   return (
-    <div className="space-y-5 animate-slide-up">
-      <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-          💡 Datos curiosos
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Stats calculadas en vivo · actualizadas cada minuto
-        </p>
-      </div>
+    <div className="bg-white dark:bg-gray-950">
+      <div className="py-16 sm:py-20">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
 
-      {/* Live stats */}
-      <section>
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-          En números (en vivo)
-        </h3>
-        <div className="space-y-2">
-          <StatCard
-            icon="⚽"
-            label="Goles en el torneo"
-            value={stats.totalGoals}
-            sub={`${stats.matchesPlayed} partidos jugados`}
-          />
+          {/* Section header */}
+          <div className="mb-12">
+            <p className="text-[11px] font-bold text-accent-green uppercase tracking-[0.2em] mb-2">
+              DATOS DEL TORNEO
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2">
+              Datos que no sabías
+            </h2>
+            <p className="text-gray-500 text-base">
+              Stats calculadas en vivo · actualizadas con cada partido
+            </p>
+          </div>
 
-          <StatCard
-            icon="📊"
-            label="Promedio de goles por partido"
-            value={stats.avgGoalsPerMatch.toFixed(2)}
-            sub="Meta histórica: >2.5 goles/partido"
-          />
+          {/* Live stats section */}
+          <div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+              En números (vivo)
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
 
-          {stats.topScorer && (
-            <StatCard
-              icon={getFlag(stats.topScorer.team)}
-              label="Goleador del torneo"
-              value={`${stats.topScorer.name} — ${stats.topScorer.goals} gol${stats.topScorer.goals !== 1 ? 'es' : ''}`}
-              sub={t(stats.topScorer.team)}
-            />
-          )}
+              {/* Total goals */}
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                <div className="text-2xl mb-3">⚽</div>
+                <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                  {stats.totalGoals}
+                </div>
+                <div className="text-xs text-gray-500 leading-snug">Goles en el torneo</div>
+                <div className="text-[11px] text-gray-400 mt-1">{stats.matchesPlayed} partidos jugados</div>
+              </div>
 
-          {stats.mostGoalsGroup && (
-            <StatCard
-              icon="🔥"
-              label="Grupo más goleador"
-              value={`${tGroup(`Group ${stats.mostGoalsGroup.group}`)} — ${stats.mostGoalsGroup.total} goles`}
-              sub="El más entretenido hasta ahora"
-            />
-          )}
+              {/* Avg goals per match */}
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                <div className="text-2xl mb-3">📊</div>
+                <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                  {stats.avgGoalsPerMatch.toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-500 leading-snug">Promedio goles/partido</div>
+                <div className="text-[11px] text-gray-400 mt-1">Meta: &gt;2.5</div>
+              </div>
 
-          <StatCard
-            icon="🌎"
-            label="Selecciones LATAM que siguen vivas"
-            value={`${stats.latamAlive} de 6`}
-            sub="Argentina · Brasil · Colombia · Uruguay · Ecuador · Paraguay"
-          />
-
-          {stats.fastestGoal && (
-            <StatCard
-              icon="⚡"
-              label="Gol más rápido del torneo"
-              value={`Min. ${stats.fastestGoal.minute} — ${stats.fastestGoal.name}`}
-              sub={`${getFlag(stats.fastestGoal.team)} ${t(stats.fastestGoal.team)} · ${stats.fastestGoal.match}`}
-            />
-          )}
-
-          {stats.noDrawStreak > 1 && (
-            <StatCard
-              icon="🚫"
-              label="Racha de partidos sin empate"
-              value={`${stats.noDrawStreak} partidos seguidos`}
-              sub="Contando desde el último partido"
-            />
-          )}
-
-          {stats.matchesPlayed === 0 && (
-            <div className="card text-center text-gray-500 dark:text-gray-400 py-6 text-sm">
-              Aún no hay partidos jugados. ¡Volvé cuando empiece el torneo!
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Fixed editorial facts */}
-      <section>
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-          Sabías que…
-        </h3>
-        <div className="space-y-2">
-          {FIXED_FACTS.map((f) => (
-            <div key={f.title} className="card">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl shrink-0 mt-0.5">{f.icon}</span>
-                <div>
-                  <div className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">
-                    {f.title}
+              {/* Top scorer */}
+              {stats.topScorer && (
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                  <div className="text-2xl mb-3">{getFlag(stats.topScorer.team)}</div>
+                  <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                    {stats.topScorer.name}
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {f.body}
+                  <div className="text-xs text-gray-500 leading-snug">
+                    {stats.topScorer.goals} gol{stats.topScorer.goals !== 1 ? 'es' : ''} · Goleador del torneo
+                  </div>
+                  <div className="text-[11px] text-gray-400 mt-1">{t(stats.topScorer.team)}</div>
+                </div>
+              )}
+
+              {/* Most goals group */}
+              {stats.mostGoalsGroup && (
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                  <div className="text-2xl mb-3">🔥</div>
+                  <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                    {tGroup(`Group ${stats.mostGoalsGroup.group}`)}
+                  </div>
+                  <div className="text-xs text-gray-500 leading-snug">Grupo más goleador</div>
+                  <div className="text-[11px] text-gray-400 mt-1">{stats.mostGoalsGroup.total} goles totales</div>
+                </div>
+              )}
+
+              {/* LATAM alive */}
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                <div className="text-2xl mb-3">🌎</div>
+                <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                  {stats.latamAlive}
+                </div>
+                <div className="text-xs text-gray-500 leading-snug">Selecciones LATAM vivas</div>
+                <div className="text-[11px] text-gray-400 mt-1">de 6 · ARG · BRA · COL · URU · ECU · PAR</div>
+              </div>
+
+              {/* Fastest goal */}
+              {stats.fastestGoal && (
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                  <div className="text-2xl mb-3">⚡</div>
+                  <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                    Min. {stats.fastestGoal.minute}
+                  </div>
+                  <div className="text-xs text-gray-500 leading-snug">
+                    Gol más rápido · {stats.fastestGoal.name}
+                  </div>
+                  <div className="text-[11px] text-gray-400 mt-1">
+                    {getFlag(stats.fastestGoal.team)} {t(stats.fastestGoal.team)}
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* No-draw streak */}
+              {stats.noDrawStreak > 1 && (
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                  <div className="text-2xl mb-3">🚫</div>
+                  <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                    {stats.noDrawStreak}
+                  </div>
+                  <div className="text-xs text-gray-500 leading-snug">Partidos seguidos sin empate</div>
+                  <div className="text-[11px] text-gray-400 mt-1">Contando desde el último partido</div>
+                </div>
+              )}
+
             </div>
-          ))}
+          </div>
+
+          {/* Editorial facts section */}
+          <div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 mt-4">
+              Sabías que…
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {FIXED_FACTS.map((f) => (
+                <div
+                  key={f.title}
+                  className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm"
+                >
+                  <div className="text-3xl mb-3">{f.icon}</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white mb-1">{f.title}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
-      </section>
+      </div>
     </div>
   )
 }

@@ -3,9 +3,16 @@
 @tailwind utilities;
 
 :root {
+  /* legacy grass tokens */
   --grass: #639922;
   --grass-light: #7ab82a;
   --grass-dark: #4d7519;
+  /* redesign tokens */
+  --pitch-dark: #0a1f0a;
+  --pitch-mid: #152b15;
+  --accent-green: #22c55e;
+  --accent-green-light: #dcfce7;
+  --text-on-dark: #f0fdf4;
 }
 
 @layer base {

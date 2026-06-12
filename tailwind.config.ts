@@ -9,6 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        /* redesign tokens */
+        pitch: {
+          dark: '#0a1f0a',
+          mid: '#152b15',
+        },
+        accent: {
+          green: '#22c55e',
+          'green-light': '#dcfce7',
+        },
+        'on-dark': '#f0fdf4',
+        /* legacy */
         grass: {
           DEFAULT: '#639922',
           light: '#7ab82a',

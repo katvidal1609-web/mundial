@@ -6,6 +6,9 @@ import { getGroupStandings } from '@/lib/fixture'
 import { getFlag } from '@/lib/flags'
 import { t } from '@/lib/translations'
 
+const abbr = (name: string, max = 18) =>
+  name.length > max ? name.slice(0, max - 1) + '…' : name
+
 // Knockout match definition (indices 73–104 in fixture, 0-based: 72–103)
 interface KnockoutSlot {
   matchNum: number  // 73–104
@@ -61,7 +64,6 @@ function resolveGroupSlot(slot: string, standings: Map<string, { position: numbe
   if (!groupTable || groupTable.length < pos) return slot
   return groupTable[pos - 1]?.team ?? slot
 }
-
 
 export default function BracketSimulator({ matches }: { matches: Match[] }) {
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mundial2026latam.vercel.app'
@@ -184,10 +186,6 @@ export default function BracketSimulator({ matches }: { matches: Match[] }) {
     }
   }
 
-  const isProjected = (team: string | undefined) =>
-    team && !Object.values(winners).includes(team) &&
-    !R32_DEFS.some(() => false)
-
   const MatchSlot = ({
     matchNum,
     team1,
@@ -205,9 +203,9 @@ export default function BracketSimulator({ matches }: { matches: Match[] }) {
     const ready = !!(team1 && team2)
 
     return (
-      <div className={`card min-w-[140px] ${small ? 'p-2' : 'p-3'}`}>
+      <div className={`${small ? 'min-w-[150px] p-2' : 'min-w-[160px] p-3'} bg-white/5 border border-white/10 rounded-xl`}>
         {label && (
-          <div className="text-[10px] text-gray-400 font-medium mb-1.5 uppercase">{label}</div>
+          <div className="text-[10px] text-on-dark/40 font-medium mb-1.5 uppercase tracking-wide">{label}</div>
         )}
         {[
           { key: 'team1', team: team1 },
@@ -219,25 +217,23 @@ export default function BracketSimulator({ matches }: { matches: Match[] }) {
               key={key}
               onClick={() => team && ready && setWinner(matchNum, team)}
               disabled={!ready}
-              className={`w-full flex items-center gap-2 ${small ? 'py-1' : 'py-1.5'} px-2 rounded-lg transition-all text-left
+              className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg transition-all text-left
                 ${isWinner
-                  ? 'bg-[#639922] text-white font-semibold'
+                  ? 'bg-accent-green text-pitch-dark font-bold'
                   : team && ready
-                    ? 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer'
-                    : 'opacity-40 cursor-default'
+                    ? 'hover:bg-white/10 text-on-dark cursor-pointer'
+                    : 'opacity-30 cursor-default text-on-dark/50'
                 }`}
             >
               {team ? (
                 <>
                   <span className={small ? 'text-base' : 'text-xl'}>{getFlag(team)}</span>
                   <span className={small ? 'text-[11px]' : 'text-xs'}>
-                    {t(team)}
+                    {small ? abbr(t(team), 14) : t(team)}
                   </span>
                 </>
               ) : (
-                <span className="text-[11px] text-gray-400 italic">
-                  Ganador de M{key === 'team1' ? '' : ''}…
-                </span>
+                <span className="text-[11px] text-on-dark/30 italic">Por definir</span>
               )}
             </button>
           )
@@ -247,126 +243,135 @@ export default function BracketSimulator({ matches }: { matches: Match[] }) {
   }
 
   return (
-    <div className="space-y-5 animate-slide-up">
-      <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-          📊 Simulador de Llave
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Tocá un equipo para avanzarlo · proyectado desde standings actuales
-        </p>
-      </div>
+    <div className="bg-pitch-dark w-full">
+      <div className="py-16 sm:py-20">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
 
-      {champion && (
-        <div className="card bg-[#639922]/10 border-[#639922]/30 text-center py-4">
-          <div className="text-3xl mb-1">{getFlag(champion)}</div>
-          <div className="text-base font-bold text-[#639922]">
-            {t(champion)} — Campeón 🏆
+          {/* Section Header */}
+          <div className="mb-8">
+            <p className="text-[11px] font-bold text-accent-green uppercase tracking-[0.2em] mb-2">
+              SIMULADOR INTERACTIVO
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-black text-on-dark mb-2">
+              🏆 Simulador de Llave
+            </h2>
+            <p className="text-on-dark/50 text-sm">
+              Tocá un equipo para avanzarlo · proyectado desde standings actuales
+            </p>
           </div>
+
+          {/* Champion Banner */}
+          {champion && (
+            <div className="bg-accent-green/10 border border-accent-green/30 rounded-2xl p-6 text-center mb-6">
+              <div className="text-5xl mb-2">{getFlag(champion)}</div>
+              <div className="text-2xl font-black text-accent-green">
+                {t(champion)} — Campeón 🏆
+              </div>
+              <button
+                onClick={shareChampion}
+                className="mt-3 px-5 py-2 rounded-full bg-accent-green text-pitch-dark text-sm font-bold hover:bg-accent-green/80 transition-colors"
+              >
+                {copied ? '¡Copiado! 🎉' : '📋 Copiar y compartir'}
+              </button>
+            </div>
+          )}
+
+          {/* Bracket: horizontally scrollable */}
+          <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 pb-6">
+            <div className="flex gap-4 min-w-max px-4 sm:px-6 lg:px-8">
+
+              {/* R32 */}
+              <div className="space-y-2">
+                <div className="text-[10px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-3">
+                  Ronda de 32
+                </div>
+                {r32.map((m) => (
+                  <MatchSlot
+                    key={m.num}
+                    matchNum={m.num}
+                    team1={m.team1}
+                    team2={m.team2}
+                    small
+                  />
+                ))}
+              </div>
+
+              {/* R16 */}
+              <div className="space-y-2 mt-[calc(theme(spacing.2)+theme(spacing.6))]">
+                <div className="text-[10px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-3">
+                  Octavos
+                </div>
+                {r16.map((m) => (
+                  <div key={m.num} className="mt-[calc(theme(spacing.2))]">
+                    <MatchSlot
+                      matchNum={m.num}
+                      team1={m.team1}
+                      team2={m.team2}
+                      small
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* QF */}
+              <div className="space-y-2 mt-[calc(theme(spacing.2)+theme(spacing.12))]">
+                <div className="text-[10px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-3">
+                  Cuartos
+                </div>
+                {qf.map((m) => (
+                  <div key={m.num} className="mt-4">
+                    <MatchSlot
+                      matchNum={m.num}
+                      team1={m.team1}
+                      team2={m.team2}
+                      small
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* SF */}
+              <div className="space-y-2 mt-[calc(theme(spacing.2)+theme(spacing.24))]">
+                <div className="text-[10px] font-bold text-on-dark/40 uppercase tracking-widest text-center mb-3">
+                  Semis
+                </div>
+                {sf.map((m) => (
+                  <div key={m.num} className="mt-8">
+                    <MatchSlot
+                      matchNum={m.num}
+                      team1={m.team1}
+                      team2={m.team2}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Final */}
+              <div className="mt-[calc(theme(spacing.2)+theme(spacing.36))]">
+                <div className="text-[10px] font-bold text-accent-green uppercase tracking-widest text-center mb-3">
+                  Final 🏆
+                </div>
+                <MatchSlot
+                  matchNum={104}
+                  team1={finalMatch.team1}
+                  team2={finalMatch.team2}
+                  label="19 Jul · MetLife"
+                />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Reset Button */}
           <button
-            onClick={shareChampion}
-            className="mt-3 text-xs px-4 py-1.5 rounded-full bg-[#639922] text-white font-semibold hover:bg-[#4d7519] transition-colors"
+            onClick={() => setWinners({})}
+            className="mx-auto block mt-8 px-6 py-2.5 text-sm font-semibold text-on-dark/50 border border-white/10 rounded-xl hover:text-accent-green hover:border-accent-green/50 transition-colors"
           >
-            {copied ? '¡Copiado! 🎉' : '📋 Copiar y compartir'}
+            Reiniciar simulador
           </button>
-        </div>
-      )}
 
-      {/* Bracket: horizontally scrollable */}
-      <div className="overflow-x-auto pb-4 -mx-4 px-4">
-        <div className="flex gap-3 min-w-max">
-          {/* R32 */}
-          <div className="space-y-2">
-            <div className="text-[10px] font-bold text-gray-400 uppercase text-center mb-2">
-              Ronda de 32
-            </div>
-            {r32.map((m) => (
-              <MatchSlot
-                key={m.num}
-                matchNum={m.num}
-                team1={m.team1}
-                team2={m.team2}
-                small
-              />
-            ))}
-          </div>
-
-          {/* R16 */}
-          <div className="space-y-2 mt-[calc(theme(spacing.2)+theme(spacing.6))]">
-            <div className="text-[10px] font-bold text-gray-400 uppercase text-center mb-2">
-              Octavos
-            </div>
-            {r16.map((m) => (
-              <div key={m.num} className="mt-[calc(theme(spacing.2))]">
-                <MatchSlot
-                  matchNum={m.num}
-                  team1={m.team1}
-                  team2={m.team2}
-                  small
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* QF */}
-          <div className="space-y-2 mt-[calc(theme(spacing.2)+theme(spacing.12))]">
-            <div className="text-[10px] font-bold text-gray-400 uppercase text-center mb-2">
-              Cuartos
-            </div>
-            {qf.map((m) => (
-              <div key={m.num} className="mt-4">
-                <MatchSlot
-                  matchNum={m.num}
-                  team1={m.team1}
-                  team2={m.team2}
-                  small
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* SF */}
-          <div className="space-y-2 mt-[calc(theme(spacing.2)+theme(spacing.24))]">
-            <div className="text-[10px] font-bold text-gray-400 uppercase text-center mb-2">
-              Semis
-            </div>
-            {sf.map((m) => (
-              <div key={m.num} className="mt-8">
-                <MatchSlot
-                  matchNum={m.num}
-                  team1={m.team1}
-                  team2={m.team2}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Final */}
-          <div className="mt-[calc(theme(spacing.2)+theme(spacing.36))]">
-            <div className="text-[10px] font-bold text-[#639922] uppercase text-center mb-2">
-              Final 🏆
-            </div>
-            <MatchSlot
-              matchNum={104}
-              team1={finalMatch.team1}
-              team2={finalMatch.team2}
-              label="19 Jul · MetLife"
-            />
-          </div>
         </div>
       </div>
-
-      <p className="text-[11px] text-gray-400 dark:text-gray-600 text-center">
-        Los equipos en la ronda de 32 son proyecciones según los standings actuales.
-        Al avanzar partidos, los siguientes cruces se actualizan automáticamente.
-      </p>
-
-      <button
-        onClick={() => setWinners({})}
-        className="w-full py-2 text-xs text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl hover:text-red-500 hover:border-red-300 transition-colors"
-      >
-        Reiniciar simulador
-      </button>
     </div>
   )
 }
