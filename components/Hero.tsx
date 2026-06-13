@@ -2,19 +2,20 @@ import type { Match } from '@/lib/types'
 import { t } from '@/lib/translations'
 import { getFlag } from '@/lib/flags'
 
-function toLimaTime(dateStr: string, timeStr: string): string {
+// Parses "18:00 UTC-7" or "20:00 UTC-6" manually and converts to Lima (UTC-5).
+// Formula: limaMin = (h*60+m) - offset*60 - 5*60, then wrap mod 1440.
+function toLimaTime(timeStr: string): string {
   if (!timeStr) return ''
-  try {
-    const dt = new Date(`${dateStr}T${timeStr}:00Z`)
-    return dt.toLocaleTimeString('es-PE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'America/Lima',
-    })
-  } catch {
-    return timeStr
-  }
+  const m = timeStr.match(/(\d{1,2}):(\d{2})(?:\s*UTC([+-]\d+))?/)
+  if (!m) return timeStr
+  const h = parseInt(m[1], 10)
+  const min = parseInt(m[2], 10)
+  const offset = m[3] !== undefined ? parseInt(m[3], 10) : -5
+  const totalMin = h * 60 + min - offset * 60 - 5 * 60
+  const norm = ((totalMin % 1440) + 1440) % 1440
+  const lh = Math.floor(norm / 60)
+  const lm = norm % 60
+  return `${String(lh).padStart(2, '0')}:${String(lm).padStart(2, '0')} Lima`
 }
 
 function PlayedCard({ match }: { match: Match }) {
@@ -98,7 +99,7 @@ function PlayedCard({ match }: { match: Match }) {
 }
 
 function UpcomingCard({ match }: { match: Match }) {
-  const limaTime = toLimaTime(match.date, match.time)
+  const limaTime = toLimaTime(match.time)
 
   return (
     <div className="shrink-0 w-72 sm:w-auto bg-white/5 border border-white/10 rounded-2xl p-4">

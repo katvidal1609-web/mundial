@@ -32,7 +32,7 @@ export default function YapeFooter() {
             </h2>
 
             <p className="text-gray-500 text-sm mb-6">
-              Hecho con 💚 por un hincha más de LATAM
+              Hecho por una peruana 🇵🇪 ❤️
             </p>
 
             <p className="text-3xl font-black text-gray-900 dark:text-white tracking-wide mb-4">
@@ -57,9 +57,10 @@ export default function YapeFooter() {
               ESCANEÁ PARA YAPEAR
             </p>
             <img
-              src="/yape-qr.png"
+              src="/YAPE.JPG"
               alt="QR Yape"
-              className="w-full max-w-[220px] rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800"
+              width={180}
+              className="rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800"
             />
             <p className="text-xs text-gray-400">
               Abrí Yape → Escanear QR
@@ -69,20 +70,8 @@ export default function YapeFooter() {
         </div>
 
         {/* Footer bar */}
-        <div className="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400 dark:text-gray-600">
-          <p>
-            Datos:{' '}
-            <a
-              href="https://github.com/openfootball/worldcup.json"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-accent-green"
-            >
-              openfootball
-            </a>
-            {' '}· Análisis: Claude (Anthropic)
-          </p>
-          <p>Mundial 2026 · 11 jun – 19 jul · EE.UU. / México / Canadá</p>
+        <div className="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-600">
+          <p>Datos: openfootball · IA: Claude · Hecho con ❤️ en Lima</p>
         </div>
 
       </div>
